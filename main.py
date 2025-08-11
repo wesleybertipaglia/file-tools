@@ -1,33 +1,51 @@
-from scripts import renamer, lister, zipper
+from engine import tool_type, tool_registry, tool_loader
 
-TOOLS = {
-    "1": ("Renomear arquivos com padrão", renamer.run),
-    "2": ("Listar arquivos", lister.run),
-    "3": ("Compactar arquivos", zipper.run),
-}
+def choose_tool_type():
+    types = list(tool_type.ToolType)
+    print("Choose the type:")
+    for i, t in enumerate(types, 1):
+        print(f"{i} - {t.name.title()}")
+    print("0 - Exit")
 
-def get_tool(choice):
-    """Retorna a função associada a uma escolha de menu."""
-    return TOOLS.get(choice, (None, None))[1]
+    choice = input("Option: ").strip()
+    if choice == "0":
+        return None
+
+    try:
+        idx = int(choice) - 1
+        return types[idx]
+    except:
+        print("❌ Invalid option.")
+        return None
+
+def choose_tool(commands):
+    if not commands:
+        print("❌ No tools registered for this type.")
+        return None
+
+    print("\nChoose the tool:")
+    for key, cmd in sorted(commands.items()):
+        print(f"{key} - {cmd.name()}")
+
+    choice = input("Option: ").strip()
+    if choice == "0":
+        return None
+
+    return commands.get(choice)
 
 def main():
     while True:
-        print("\n=== FILE TOOLS ===")
-        for key, (desc, _) in TOOLS.items():
-            print(f"{key} - {desc}")
-        print("0 - Sair")
-
-        choice = input("Escolha uma opção: ").strip()
-
-        if choice == "0":
-            print("Saindo...")
+        tool_type_selected = choose_tool_type()
+        if tool_type_selected is None:
+            print("Exiting...")
             break
 
-        tool_func = get_tool(choice)
-        if tool_func:
-            tool_func()
+        commands = tool_registry.get_commands_by_type(tool_type_selected)
+        command = choose_tool(commands)
+        if command:
+            command.run()
         else:
-            print("❌ Opção inválida!")
+            print("❌ Invalid or cancelled tool.")
 
 if __name__ == "__main__":
     main()
