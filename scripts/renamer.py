@@ -6,6 +6,14 @@ PATTERNS = {
     "2": ("Remover caracteres especiais", r"[^\w\s]"),
     "3": ("Remover texto exato", None),
     "4": ("Regex personalizada", None),
+    "5": ("Estilo de texto", "STYLE"),
+}
+
+TEXT_STYLES = {
+    "1": ("Capitalized", str.capitalize),
+    "2": ("Title", str.title),
+    "3": ("Lower", str.lower),
+    "4": ("Upper", str.upper),
 }
 
 def run():
@@ -15,7 +23,7 @@ def run():
         print("❌ Caminho inválido.")
         return
 
-    print("\nEscolha o padrão de remoção:")
+    print("\nEscolha o padrão de remoção/transformação:")
     for key, (desc, _) in PATTERNS.items():
         print(f"{key} - {desc}")
 
@@ -26,6 +34,33 @@ def run():
         return
 
     desc, pattern = PATTERNS[choice]
+
+    if pattern == "STYLE":
+        print("\nEscolha o estilo de texto:")
+        for key, (style_name, _) in TEXT_STYLES.items():
+            print(f"{key} - {style_name}")
+        style_choice = input("Opção: ").strip()
+
+        if style_choice not in TEXT_STYLES:
+            print("❌ Opção inválida para estilo.")
+            return
+
+        style_name, style_func = TEXT_STYLES[style_choice]
+
+        renamed_count = 0
+        for filename in os.listdir(folder):
+            full_path = os.path.join(folder, filename)
+            if os.path.isfile(full_path):
+                name, ext = os.path.splitext(filename)
+                new_name = style_func(name) + ext
+                if new_name != filename:
+                    new_full_path = os.path.join(folder, new_name)
+                    os.rename(full_path, new_full_path)
+                    print(f"Renomeado: {filename} → {new_name}")
+                    renamed_count += 1
+
+        print(f"\n✅ {renamed_count} arquivos renomeados usando estilo: {style_name}")
+        return
 
     if choice == "3":
         text_to_remove = input("Digite o texto exato a remover: ").strip()
