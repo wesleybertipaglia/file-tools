@@ -1,34 +1,51 @@
-from scripts import file_lister, file_renamer, file_zipper, img_converter
+from engine import tool_type, tool_registry, tool_loader
 
-TOOLS = {
-    "1": ("Renomear arquivos com padrão", file_renamer.run),
-    "2": ("Listar arquivos", file_lister.run),
-    "3": ("Compactar arquivos", file_zipper.run),
-    "4": ("Converter imagens", img_converter.run),
-}
+def choose_tool_type():
+    tipos = list(tool_type.ToolType)
+    print("Escolha o tipo:")
+    for i, t in enumerate(tipos, 1):
+        print(f"{i} - {t.name.title()}")
+    print("0 - Sair")
 
-def get_tool(choice):
-    """Retorna a função associada a uma escolha de menu."""
-    return TOOLS.get(choice, (None, None))[1]
+    escolha = input("Opção: ").strip()
+    if escolha == "0":
+        return None
+
+    try:
+        idx = int(escolha) - 1
+        return tipos[idx]
+    except:
+        print("❌ Opção inválida.")
+        return None
+
+def choose_tool(commands):
+    if not commands:
+        print("❌ Nenhuma ferramenta registrada para esse tipo.")
+        return None
+
+    print("\nEscolha a ferramenta:")
+    for key, cmd in sorted(commands.items()):
+        print(f"{key} - {cmd.name()}")
+
+    escolha = input("Opção: ").strip()
+    if escolha == "0":
+        return None
+
+    return commands.get(escolha)
 
 def main():
     while True:
-        print("\n=== FILE TOOLS ===")
-        for key, (desc, _) in TOOLS.items():
-            print(f"{key} - {desc}")
-        print("0 - Sair")
-
-        choice = input("Escolha uma opção: ").strip()
-
-        if choice == "0":
+        tipo = choose_tool_type()
+        if tipo is None:
             print("Saindo...")
             break
 
-        tool_func = get_tool(choice)
-        if tool_func:
-            tool_func()
+        comandos = tool_registry.get_commands_by_type(tipo)
+        comando = choose_tool(comandos)
+        if comando:
+            comando.run()
         else:
-            print("❌ Opção inválida!")
+            print("❌ Ferramenta inválida ou cancelada.")
 
 if __name__ == "__main__":
     main()
