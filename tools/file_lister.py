@@ -5,38 +5,37 @@ from engine import tool_type
 
 class ListFilesCommand(tool_command.ToolCommand):
     def name(self):
-        return "Listar Arquivos"
+        return "List Files"
 
     def type(self):
         return tool_type.ToolType.FILE
 
-    def run(self) -> str:
-        folder = input("Digite o caminho da pasta: ").strip()
+    def run(self, *args, **kwargs) -> str:
+        folder_path = input("Enter the folder path: ").strip()
 
-        if not os.path.isdir(folder):
-            print("❌ Caminho inválido.")
+        if not os.path.isdir(folder_path):
+            print("❌ Invalid path.")
             return
 
-        arquivos = sorted(os.listdir(folder))
+        files = sorted(os.listdir(folder_path))
 
-        print("\nArquivos na pasta:")
-        for filename in arquivos:
+        print("\nFiles in the folder:")
+        for filename in files:
             print(f" - {filename}")
 
-        salvar = input("\nDeseja salvar essa lista em um arquivo .txt? (s/n): ").strip().lower()
+        save_to_file = input("\nDo you want to save this list to a .txt file? (y/n): ").strip().lower()
 
-        if salvar == "s":
-            nome_arquivo = input("Digite o nome do arquivo TXT (sem extensão): ").strip()
-            if not nome_arquivo:
-                nome_arquivo = "lista_arquivos"
+        if save_to_file == "y":
+            file_name = input("Enter the TXT file name (without extension): ").strip()
+            if not file_name:
+                file_name = "file_list"
 
-            caminho_saida = os.path.join(folder, f"{nome_arquivo}.txt")
+            output_path = os.path.join(folder_path, f"{file_name}.txt")
 
             try:
-                with open(caminho_saida, "w", encoding="utf-8") as f:
-                    for filename in arquivos:
+                with open(output_path, "w", encoding="utf-8") as f:
+                    for filename in files:
                         f.write(filename + "\n")
-                print(f"✅ Lista salva em: {caminho_saida}")
+                print(f"✅ List saved to: {output_path}")
             except Exception as e:
-                print(f"❌ Erro ao salvar: {e}")
-                            
+                print(f"❌ Error saving file: {e}")

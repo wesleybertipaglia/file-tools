@@ -1,51 +1,51 @@
 from engine import tool_type, tool_registry, tool_loader
 
 def choose_tool_type():
-    tipos = list(tool_type.ToolType)
-    print("Escolha o tipo:")
-    for i, t in enumerate(tipos, 1):
+    types = list(tool_type.ToolType)
+    print("Choose the type:")
+    for i, t in enumerate(types, 1):
         print(f"{i} - {t.name.title()}")
-    print("0 - Sair")
+    print("0 - Exit")
 
-    escolha = input("Opção: ").strip()
-    if escolha == "0":
+    choice = input("Option: ").strip()
+    if choice == "0":
         return None
 
     try:
-        idx = int(escolha) - 1
-        return tipos[idx]
+        idx = int(choice) - 1
+        return types[idx]
     except:
-        print("❌ Opção inválida.")
+        print("❌ Invalid option.")
         return None
 
 def choose_tool(commands):
     if not commands:
-        print("❌ Nenhuma ferramenta registrada para esse tipo.")
+        print("❌ No tools registered for this type.")
         return None
 
-    print("\nEscolha a ferramenta:")
+    print("\nChoose the tool:")
     for key, cmd in sorted(commands.items()):
         print(f"{key} - {cmd.name()}")
 
-    escolha = input("Opção: ").strip()
-    if escolha == "0":
+    choice = input("Option: ").strip()
+    if choice == "0":
         return None
 
-    return commands.get(escolha)
+    return commands.get(choice)
 
 def main():
     while True:
-        tipo = choose_tool_type()
-        if tipo is None:
-            print("Saindo...")
+        tool_type_selected = choose_tool_type()
+        if tool_type_selected is None:
+            print("Exiting...")
             break
 
-        comandos = tool_registry.get_commands_by_type(tipo)
-        comando = choose_tool(comandos)
-        if comando:
-            comando.run()
+        commands = tool_registry.get_commands_by_type(tool_type_selected)
+        command = choose_tool(commands)
+        if command:
+            command.run()
         else:
-            print("❌ Ferramenta inválida ou cancelada.")
+            print("❌ Invalid or cancelled tool.")
 
 if __name__ == "__main__":
     main()

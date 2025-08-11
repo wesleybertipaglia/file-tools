@@ -4,15 +4,15 @@ from engine import tool_type
 class ToolCommand(ABC):
     @abstractmethod
     def name(self) -> str:
-        """Nome da ação (para exibir no menu)"""
+        """Name of the action (to display in the menu)"""
         pass
 
     @abstractmethod
     def type(self) -> tool_type.ToolType:
-        """Tipo da ferramenta (ex: RENAMER, IMAGE...)"""
+        """Type of the tool (e.g., RENAMER, IMAGE...)"""
         pass
 
     @abstractmethod
     def run(self, *args, **kwargs):
-        """Executa a lógica da ferramenta"""
+        """Executes the tool's logic"""
         pass

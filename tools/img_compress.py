@@ -6,73 +6,71 @@ from engine.tool_type import ToolType
 
 class ImgCompressCommand(ToolCommand):
     def name(self):
-        return "Comprimir Imagens"
+        return "Compress Images"
 
     def type(self):
         return ToolType.IMAGE
 
     def run(self, *args, **kwargs):
-        print("🗜️ Compressor de imagens")
+        print("🗜️ Image Compressor")
 
-        qualidade = input("Digite a qualidade para JPEG (1-95, recomendável 80): ").strip()
+        quality = input("Enter image quality (1-95, recommended 80): ").strip()
         try:
-            qualidade = int(qualidade)
-            if qualidade < 1 or qualidade > 95:
+            quality = int(quality)
+            if quality < 1 or quality > 95:
                 raise ValueError
         except ValueError:
-            print("❌ Qualidade inválida. Usando 80.")
-            qualidade = 80
+            print("❌ Invalid quality. Using 80.")
+            quality = 80
 
-        tipo = input("Deseja comprimir uma única imagem (1) ou todo o diretório (2)? ").strip()
+        choice = input("Compress a single image (1) or entire directory (2)? ").strip()
 
-        if tipo == "1":
-            self.compress_single_image(qualidade)
-        elif tipo == "2":
-            self.compress_directory(qualidade)
+        if choice == "1":
+            self.compress_single_image(quality)
+        elif choice == "2":
+            self.compress_directory(quality)
         else:
-            print("❌ Opção inválida.")
+            print("❌ Invalid option.")
 
-    def compress_single_image(self, qualidade):
-        arquivo = input("Digite o caminho da imagem: ").strip()
-        if not os.path.isfile(arquivo):
-            print("❌ Arquivo inválido.")
+    def compress_single_image(self, quality):
+        file_path = input("Enter the image path: ").strip()
+        if not os.path.isfile(file_path):
+            print("❌ Invalid file.")
             return
 
-        pasta_saida = os.path.dirname(arquivo)
-        nome_saida = os.path.basename(arquivo)
-        caminho_saida = os.path.join(pasta_saida, f"comprimido_{nome_saida}")
+        output_folder = os.path.dirname(file_path)
+        output_name = os.path.basename(file_path)
+        output_path = os.path.join(output_folder, f"compressed_{output_name}")
 
-        self.compress_image(arquivo, caminho_saida, qualidade)
+        self.compress_image(file_path, output_path, quality)
 
-    def compress_directory(self, qualidade):
-        pasta = input("Digite o caminho da pasta com imagens: ").strip()
-        if not os.path.isdir(pasta):
-            print("❌ Pasta inválida.")
+    def compress_directory(self, quality):
+        folder = input("Enter the folder path containing images: ").strip()
+        if not os.path.isdir(folder):
+            print("❌ Invalid folder.")
             return
 
-        output_dir = os.path.join(pasta, "comprimidas")
+        output_dir = os.path.join(folder, "compressed")
         os.makedirs(output_dir, exist_ok=True)
 
-        arquivos = sorted(os.listdir(pasta))
-        cont = 0
-        for arquivo in arquivos:
-            caminho_arquivo = os.path.join(pasta, arquivo)
-            if os.path.isfile(caminho_arquivo) and arquivo.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp')):
-                caminho_saida = os.path.join(output_dir, arquivo)
-                self.compress_image(caminho_arquivo, caminho_saida, qualidade)
-                cont += 1
+        files = sorted(os.listdir(folder))
+        count = 0
+        for file in files:
+            file_path = os.path.join(folder, file)
+            if os.path.isfile(file_path) and file.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp')):
+                output_path = os.path.join(output_dir, file)
+                self.compress_image(file_path, output_path, quality)
+                count += 1
 
-        print(f"\n✅ Total comprimidos: {cont}")
+        print(f"\n✅ Total compressed: {count}")
 
-    def compress_image(self, origem, destino, qualidade):
+    def compress_image(self, source, destination, quality):
         try:
-            with Image.open(origem) as img:
-                formato = img.format
+            with Image.open(source) as img:
                 save_kwargs = {}
-                if formato == "JPEG":
-                    save_kwargs["quality"] = qualidade
+                save_kwargs["quality"] = quality
 
-                img.save(destino, formato, **save_kwargs)
-            print(f"📦 Comprimido: {os.path.basename(destino)}")
+                img.save(destination, img.format, **save_kwargs)
+            print(f"📦 Compressed: {os.path.basename(destination)}")
         except Exception as e:
-            print(f"❌ Erro ao comprimir {os.path.basename(origem)}: {e}")
+            print(f"❌ Error compressing {os.path.basename(source)}: {e}")

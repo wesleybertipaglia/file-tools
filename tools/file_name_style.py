@@ -13,26 +13,26 @@ class FileRenamerStyleCommand(ToolCommand):
     }
 
     def name(self):
-        return "Renomear Arquivos (Estilo de Texto)"
+        return "Rename Files (Text Style)"
 
     def type(self):
         return ToolType.FILE
 
     def run(self, *args, **kwargs):
-        folder = input("Digite o caminho da pasta: ").strip()
+        folder = input("Enter the folder path: ").strip()
 
         if not os.path.isdir(folder):
-            print("❌ Caminho inválido.")
+            print("❌ Invalid path.")
             return
 
-        print("\nEscolha o estilo de texto:")
+        print("\nChoose the text style:")
         for key, (style_name, _) in self.TEXT_STYLES.items():
             print(f"{key} - {style_name}")
 
-        style_choice = input("Opção: ").strip()
+        style_choice = input("Option: ").strip()
 
         if style_choice not in self.TEXT_STYLES:
-            print("❌ Opção inválida para estilo.")
+            print("❌ Invalid style option.")
             return
 
         style_name, style_func = self.TEXT_STYLES[style_choice]
@@ -46,10 +46,7 @@ class FileRenamerStyleCommand(ToolCommand):
                 if new_name != filename:
                     new_full_path = os.path.join(folder, new_name)
                     os.rename(full_path, new_full_path)
-                    print(f"Renomeado: {filename} → {new_name}")
+                    print(f"Renamed: {filename} → {new_name}")
                     renamed_count += 1
 
-        print(f"\n✅ {renamed_count} arquivos renomeados usando estilo: {style_name}")
-
-
-register_command("4", FileRenamerStyleCommand())
+        print(f"\n✅ {renamed_count} files renamed using style: {style_name}")

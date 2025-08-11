@@ -7,49 +7,49 @@ from engine.tool_type import ToolType
 
 class FileZipperCommand(ToolCommand):
     def name(self):
-        return "Compactar arquivos"
+        return "Compress Files"
 
     def type(self):
         return ToolType.FILE
 
     def run(self, *args, **kwargs):
-        folder_path = input("Digite o caminho da pasta: ").strip()
+        folder_path = input("Enter the folder path: ").strip()
         folder_path = os.path.normpath(folder_path)
 
         if not os.path.isdir(folder_path):
-            print(f"❌ Erro: '{folder_path}' não é uma pasta válida.")
+            print(f"❌ Error: '{folder_path}' is not a valid folder.")
             return
 
-        print("\nEscolha uma opção:")
-        print("1. Compactar apenas um arquivo")
-        print("2. Compactar todos os arquivos do diretório")
-        choice = input("Digite 1 ou 2: ").strip()
+        print("\nChoose an option:")
+        print("1. Compress a single file")
+        print("2. Compress all files in the directory")
+        choice = input("Enter 1 or 2: ").strip()
 
         if choice == "1":
             self.zip_single_file(folder_path)
         elif choice == "2":
             self.zip_all_files(folder_path)
         else:
-            print("❌ Opção inválida.")
+            print("❌ Invalid option.")
 
     def zip_single_file(self, folder_path):
         files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
 
         if not files:
-            print("❌ Nenhum arquivo encontrado na pasta.")
+            print("❌ No files found in the folder.")
             return
 
-        print("\nArquivos disponíveis:")
+        print("\nAvailable files:")
         for i, file in enumerate(files, 1):
             print(f"{i}. {file}")
 
         try:
-            choice = int(input("\nDigite o número do arquivo que deseja zipar: "))
+            choice = int(input("\nEnter the number of the file you want to zip: "))
             if choice < 1 or choice > len(files):
-                print("❌ Escolha inválida.")
+                print("❌ Invalid choice.")
                 return
         except ValueError:
-            print("❌ Entrada inválida. Digite um número.")
+            print("❌ Invalid input. Please enter a number.")
             return
 
         file_to_zip = files[choice - 1]
@@ -59,7 +59,7 @@ class FileZipperCommand(ToolCommand):
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             zipf.write(file_path, arcname=file_to_zip)
 
-        print(f"📦 Arquivo compactado: {zip_path}")
+        print(f"📦 File compressed: {zip_path}")
 
     def zip_all_files(self, folder_path):
         for root, _, files in os.walk(folder_path):
@@ -70,7 +70,4 @@ class FileZipperCommand(ToolCommand):
                 with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                     zipf.write(file_path, arcname=file)
 
-                print(f"📦 Arquivo compactado: {zip_path}")
-
-
-register_command("2", FileZipperCommand())
+                print(f"📦 File compressed: {zip_path}")

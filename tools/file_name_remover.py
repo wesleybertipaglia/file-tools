@@ -6,51 +6,51 @@ from engine.tool_type import ToolType
 
 class FileRenamerPatternCommand(ToolCommand):
     PATTERNS = {
-        "1": ("Remover números", r"\d"),
-        "2": ("Remover caracteres especiais", r"[^\w\s]"),
-        "3": ("Remover texto exato", None),
-        "4": ("Regex personalizada", None),
+        "1": ("Remove numbers", r"\d"),
+        "2": ("Remove special characters", r"[^\w\s]"),
+        "3": ("Remove exact text", None),
+        "4": ("Custom regex", None),
     }
 
     def name(self):
-        return "Renomear Arquivos (Padrão de Remoção)"
+        return "Rename Files (Removal Pattern)"
 
     def type(self):
         return ToolType.FILE
 
     def run(self, *args, **kwargs):
-        folder = input("Digite o caminho da pasta: ").strip()
+        folder = input("Enter the folder path: ").strip()
 
         if not os.path.isdir(folder):
-            print("❌ Caminho inválido.")
+            print("❌ Invalid path.")
             return
 
-        print("\nEscolha o padrão de remoção:")
+        print("\nChoose the removal pattern:")
         for key, (desc, _) in self.PATTERNS.items():
             print(f"{key} - {desc}")
 
-        choice = input("Opção: ").strip()
+        choice = input("Option: ").strip()
 
         if choice not in self.PATTERNS:
-            print("❌ Opção inválida.")
+            print("❌ Invalid option.")
             return
 
         desc, pattern = self.PATTERNS[choice]
 
         if choice == "3":
-            text_to_remove = input("Digite o texto exato a remover: ").strip()
+            text_to_remove = input("Enter the exact text to remove: ").strip()
             pattern = re.escape(text_to_remove)
         elif choice == "4":
-            pattern = input("Digite sua regex personalizada: ").strip()
+            pattern = input("Enter your custom regex: ").strip()
 
         start_pos = None
         end_pos = None
         if choice != "4":
             try:
-                start_pos = int(input("Digite a posição inicial (começando por 0): ").strip())
-                end_pos = int(input("Digite a posição final (deixe em branco para ir até o fim): ").strip() or -1)
+                start_pos = int(input("Enter the start position (starting at 0): ").strip())
+                end_pos = int(input("Enter the end position (leave blank to go to the end): ").strip() or -1)
             except ValueError:
-                print("❌ Posições inválidas.")
+                print("❌ Invalid positions.")
                 return
 
         regex = re.compile(pattern)
@@ -70,7 +70,7 @@ class FileRenamerPatternCommand(ToolCommand):
                 if new_name != filename:
                     new_full_path = os.path.join(folder, new_name)
                     os.rename(full_path, new_full_path)
-                    print(f"Renomeado: {filename} → {new_name}")
+                    print(f"Renamed: {filename} → {new_name}")
                     renamed_count += 1
 
-        print(f"\n✅ {renamed_count} arquivos renomeados usando padrão: {desc}")
+        print(f"\n✅ {renamed_count} files renamed using pattern: {desc}")
