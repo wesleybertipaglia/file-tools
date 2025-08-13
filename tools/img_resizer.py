@@ -16,59 +16,88 @@ class ImgResizerCommand(ToolCommand):
 
         try:
             width = int(input("Enter width (px): ").strip())
-            height = int(input("Enter height (px): ").strip())
         except ValueError:
-            print("❌ Invalid width or height.")
+            print("❌ Invalid width.")
             return
 
-        choice = input("Resize a single image (1) or entire directory (2)? ").strip()
-
-        if choice == "1":
-            self.resize_single_image(width, height)
-        elif choice == "2":
-            self.resize_directory(width, height)
+        use_ratio = input("Do you want to specify a proportion (y/n)? ").strip().lower()
+        if use_ratio == 'y':
+            ratio_input = input("Enter the proportion (e.g., 16/9): ").strip()
+            try:
+                x, y = map(int, ratio_input.split("/"))
+                height = int((width * y) / x)
+                print(f"📐 Calculated height based on ratio {x}/{y}: {height}px")
+            except Exception:
+                print("❌ Invalid ratio.")
+                return
         else:
-            print("❌ Invalid option.")
+            try:
+                height = int(input("Enter height (px): ").strip())
+            except ValueError:
+                print("❌ Invalid height.")
+                return
 
-    def resize_single_image(self, width, height):
-        file_path = input("Enter the image path: ").strip()
-        if not os.path.isfile(file_path):
-            print("❌ Invalid file.")
+        path = input("Enter file or directory path: ").strip()
+        path = os.path.normpath(path)
+
+        if os.path.isfile(path):
+            self.resize_single_image(path, width, height)
+        elif os.path.isdir(path):
+            self.resize_directory(path, width, height)
+        else:
+            print("❌ Path is not a valid file or directory.")
+
+    def resize_single_image(self, file_path, width, height):
+        if not self.is_image(file_path):
+            print("❌ Not a supported image format.")
             return
 
         output_name = os.path.splitext(os.path.basename(file_path))[0] + f"_resized{os.path.splitext(file_path)[1]}"
         output_folder = os.path.dirname(file_path)
         output_path = os.path.join(output_folder, output_name)
 
-        self.resize_image(file_path, output_path, width, height)
+        self.resize_image(file_path, output_path, width, height, show_status=True)
 
-    def resize_directory(self, width, height):
-        folder = input("Enter the folder path: ").strip()
-        if not os.path.isdir(folder):
-            print("❌ Invalid folder.")
-            return
-
+    def resize_directory(self, folder, width, height):
         output_dir = os.path.join(folder, "resized")
         os.makedirs(output_dir, exist_ok=True)
 
-        files = sorted(os.listdir(folder))
-        count = 0
+        files = sorted([
+            f for f in os.listdir(folder)
+            if os.path.isfile(os.path.join(folder, f)) and self.is_image(f)
+        ])
 
-        for file in files:
+        total = len(files)
+        if total == 0:
+            print("❌ No supported image files found in the directory.")
+            return
+
+        for idx, file in enumerate(files, start=1):
             file_path = os.path.join(folder, file)
-            if os.path.isfile(file_path) and file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff', '.webp')):
-                output_name = os.path.splitext(file)[0] + f"_resized{os.path.splitext(file)[1]}"
-                output_path = os.path.join(output_dir, output_name)
-                self.resize_image(file_path, output_path, width, height)
-                count += 1
+            output_name = os.path.splitext(file)[0] + f"_resized{os.path.splitext(file)[1]}"
+            output_path = os.path.join(output_dir, output_name)
 
-        print(f"\n✅ Total resized: {count}")
+            success = self.resize_image(file_path, output_path, width, height, show_status=False)
 
-    def resize_image(self, source, destination, width, height):
+            if success:
+                print(f"{idx} / {total} ✅ Resized: {output_name}")
+            else:
+                print(f"{idx} / {total} ❌ Failed: {file}")
+
+        print(f"\n✅ Total resized: {total}")
+
+    def resize_image(self, source, destination, width, height, show_status=True):
         try:
             with Image.open(source) as img:
                 img = img.resize((width, height), Image.LANCZOS)
                 img.save(destination)
-            print(f"✅ Resized: {os.path.basename(destination)}")
+            if show_status:
+                print(f"✅ Resized: {os.path.basename(destination)}")
+            return True
         except Exception as e:
-            print(f"❌ Error resizing {os.path.basename(source)}: {e}")
+            if show_status:
+                print(f"❌ Error resizing {os.path.basename(source)}: {e}")
+            return False
+
+    def is_image(self, filename):
+        return filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff', '.webp'))
