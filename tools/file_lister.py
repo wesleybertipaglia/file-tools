@@ -26,6 +26,7 @@ class ListFilesCommand(tool_command.ToolCommand):
         save_to_file = input("\nDo you want to save this list to a .txt file? (y/n): ").strip().lower()
 
         if save_to_file == "y":
+            remove_extensions = input("Do you want to remove file extensions in the list? (y/n): ").strip().lower()
             file_name = input("Enter the TXT file name (without extension): ").strip()
             if not file_name:
                 file_name = "file_list"
@@ -35,7 +36,8 @@ class ListFilesCommand(tool_command.ToolCommand):
             try:
                 with open(output_path, "w", encoding="utf-8") as f:
                     for filename in files:
-                        f.write(filename + "\n")
+                        name_to_write = os.path.splitext(filename)[0] if remove_extensions == "y" else filename
+                        f.write(name_to_write + "\n")
                 print(f"✅ List saved to: {output_path}")
             except Exception as e:
                 print(f"❌ Error saving file: {e}")
