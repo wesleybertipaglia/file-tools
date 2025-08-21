@@ -82,11 +82,13 @@ class ImgConverterCommand(ToolCommand):
     def convert_image(self, source, destination, fmt, quality, show_status=True):
         try:
             with Image.open(source) as img:
-                if img.mode in ("RGBA", "P") and fmt == "JPEG":
+                if img.mode in ("RGBA", "P") and fmt in ("JPG", "JPEG"):
                     img = img.convert("RGB")
 
-                save_kwargs = {"quality": quality} if fmt == "JPEG" else {}
-                img.save(destination, fmt, **save_kwargs)
+                save_format = "JPEG" if fmt in ("JPG", "JPEG") else fmt
+                save_kwargs = {"quality": quality} if save_format == "JPEG" else {}
+
+                img.save(destination, save_format, **save_kwargs)
 
             if show_status:
                 print(f"✅ Converted: {os.path.basename(destination)}")
