@@ -16,7 +16,7 @@ class FileZipperCommand(ToolCommand):
         path = os.path.normpath(path)
 
         if os.path.isdir(path):
-            self.zip_all_files(path)
+            self.zip_all_items_in_root(path)
         elif os.path.isfile(path):
             self.zip_single_file(path)
         else:
@@ -33,22 +33,27 @@ class FileZipperCommand(ToolCommand):
 
         print(f"📦 File compressed: {zip_path}")
 
-    def zip_all_files(self, folder_path):
-        files_to_zip = []
-        for root, _, files in os.walk(folder_path):
-            for file in files:
-                files_to_zip.append(os.path.join(root, file))
-
-        total = len(files_to_zip)
-        if total == 0:
-            print("❌ No files found in the directory.")
+    def zip_all_items_in_root(self, folder_path):
+        items = os.listdir(folder_path)
+        if not items:
+            print("❌ No items found in the directory.")
             return
 
-        for idx, file_path in enumerate(files_to_zip, start=1):
-            zip_name = os.path.splitext(os.path.basename(file_path))[0] + ".zip"
-            zip_path = os.path.join(os.path.dirname(file_path), zip_name)
+        total = len(items)
+
+        for idx, item in enumerate(items, start=1):
+            item_path = os.path.join(folder_path, item)
+            zip_name = os.path.splitext(item)[0] + ".zip"
+            zip_path = os.path.join(folder_path, zip_name)
 
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                zipf.write(file_path, arcname=os.path.basename(file_path))
+                if os.path.isfile(item_path):
+                    zipf.write(item_path, arcname=item)
+                elif os.path.isdir(item_path):
+                    for sub_item in os.listdir(item_path):
+                        sub_item_path = os.path.join(item_path, sub_item)
+                        arcname = os.path.join(item, sub_item)
+                        if os.path.isfile(sub_item_path):
+                            zipf.write(sub_item_path, arcname=arcname)
 
-            print(f"{idx} / {total} 📦 File compressed: {zip_path}")
+            print(f"{idx} / {total} 📦 Compressed: {zip_path}")
